@@ -147,7 +147,8 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		if parsedTagResult := regGoaccTag.FindStringSubmatch(structType.Tag(i)); len(parsedTagResult) == 4 {
 			parsedTag := parsedTagResult[2]
 
-			features = parseStructFieldTag(strings.Split(parsedTag, ","))
+			splitedTags := strings.Split(parsedTag, ",")
+			features = parseStructFieldTag(splitedTags)
 
 			// Parse json tag.
 			if parsedJsonTagResult := regJsonTag.FindStringSubmatch(parsedTag); len(parsedJsonTagResult) == 4 {
@@ -159,6 +160,9 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 				default:
 					jsonTag = parsedJsonTag
 				}
+				enableMarshalJSON = true
+			} else if slices.Contains(splitedTags, "json") {
+				jsonTag = field.Name()
 				enableMarshalJSON = true
 			}
 		}
