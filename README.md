@@ -1,6 +1,6 @@
 # goacc: go-accessor-gen
 
-Code generator accessor for Go. 
+Accessor generator for Go. 
 
 ## Getting Started
 
