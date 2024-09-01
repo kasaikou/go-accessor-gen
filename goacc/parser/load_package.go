@@ -13,7 +13,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var regTag = regexp.MustCompile(`goacc:"(.*)"`)
+var regGoaccTag = regexp.MustCompile(`(^|,)goacc:"(.*)"($|,)`)
+var regJsonTag = regexp.MustCompile(`(^|,)json:"(.*)"($|,)`)
 
 func LoadPackage(dirname string) (*packages.Package, error) {
 
@@ -141,8 +142,8 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		features := parseStructFieldTag([]string{"-"})
 
 		// Parse field tags.
-		if parsedTag := regTag.FindStringSubmatch(structType.Tag(i)); len(parsedTag) == 2 {
-			features = parseStructFieldTag(strings.Split(parsedTag[1], ","))
+		if parsedTag := regGoaccTag.FindStringSubmatch(structType.Tag(i)); len(parsedTag) == 4 {
+			features = parseStructFieldTag(strings.Split(parsedTag[2], ","))
 		}
 
 		fields = append(fields, *entity.NewFieldConfigBuilder(
