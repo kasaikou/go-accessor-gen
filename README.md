@@ -13,7 +13,7 @@ git clone https://github.com/kasaikou/goacc.git
 cd goacc
 
 # Generate with goacc.
-goacc -i tests/**/*.go
+goacc -i "tests/**/*.go"
 
 # Check generated file.
 cat tests/example/animal_goacc.go
