@@ -42,6 +42,7 @@ func (g *Generator) Generate(srcFilename string) (destFilename string, b []byte)
 	for _, structConfig := range config.Structs() {
 		generateNew(buffer, structConfig)
 		generateAccessor(buffer, structConfig)
+		generateMarshalJSON(buffer, structConfig)
 	}
 	destFilename = renameDestFilename(srcFilename)
 

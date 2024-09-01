@@ -13,8 +13,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var regGoaccTag = regexp.MustCompile(`(^|,)goacc:"(.*)"($|,)`)
-var regJsonTag = regexp.MustCompile(`(^|,)json:"(.*)"($|,)`)
+var regGoaccTag = regexp.MustCompile(`(^|,)goacc:"(.*?)"($|,)`)
+var regJsonTag = regexp.MustCompile(`(^|,)json\((.*?)\)($|,)`)
 
 func LoadPackage(dirname string) (*packages.Package, error) {
 
@@ -115,6 +115,7 @@ func parseNamedStructType(object types.Object) (namedType *types.Named, structTy
 func parseStruct(namedType *types.Named, structType *types.Struct) entity.StructConfig {
 
 	structSupportsBuilder := entity.NewStructSupportsBuilder()
+	enableMarshalJSON := false
 
 	// Check init() and build() support.
 	for i := range namedType.NumMethods() {
@@ -140,15 +141,36 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		fieldName := field.Name()
 		fieldType := field.Type()
 		features := parseStructFieldTag([]string{"-"})
+		jsonTag := "-"
 
 		// Parse field tags.
-		if parsedTag := regGoaccTag.FindStringSubmatch(structType.Tag(i)); len(parsedTag) == 4 {
-			features = parseStructFieldTag(strings.Split(parsedTag[2], ","))
+		if parsedTagResult := regGoaccTag.FindStringSubmatch(structType.Tag(i)); len(parsedTagResult) == 4 {
+			parsedTag := parsedTagResult[2]
+
+			splitedTags := strings.Split(parsedTag, ",")
+			features = parseStructFieldTag(splitedTags)
+
+			// Parse json tag.
+			if parsedJsonTagResult := regJsonTag.FindStringSubmatch(parsedTag); len(parsedJsonTagResult) == 4 {
+				switch parsedJsonTag := parsedJsonTagResult[2]; parsedJsonTag {
+				case "":
+					jsonTag = field.Name()
+				case ",omitempty":
+					jsonTag = field.Name() + ",omitempty"
+				default:
+					jsonTag = parsedJsonTag
+				}
+				enableMarshalJSON = true
+			} else if slices.Contains(splitedTags, "json") {
+				jsonTag = field.Name()
+				enableMarshalJSON = true
+			}
 		}
 
 		fields = append(fields, *entity.NewFieldConfigBuilder(
 			fieldName,
 			fieldType.String(),
+			jsonTag,
 			&features,
 		).Purge())
 	}
@@ -157,6 +179,7 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		namedType.Obj().Name(),
 		*structSupportsBuilder.Purge(),
 		"",
+		enableMarshalJSON,
 		fields,
 	).Purge()
 }

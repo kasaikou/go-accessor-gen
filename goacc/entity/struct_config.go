@@ -17,12 +17,13 @@ type ImportConfig struct {
 }
 
 type StructConfig struct {
-	name           string         `goacc:"required,get"`
-	docText        string         `goacc:"optional,get,set"`
-	defineFilename string         `goacc:"optional,get,set"`
-	structSupports StructSupports `goacc:"required,getptr"`
-	mutexFieldName string         `goacc:"required,get"`
-	fields         []FieldConfig  `goacc:"required,get"`
+	name              string         `goacc:"required,get"`
+	docText           string         `goacc:"optional,get,set"`
+	defineFilename    string         `goacc:"optional,get,set"`
+	structSupports    StructSupports `goacc:"required,getptr"`
+	mutexFieldName    string         `goacc:"required,get"`
+	enableMarshalJSON bool           `goacc:"required,get"`
+	fields            []FieldConfig  `goacc:"required,get"`
 }
 
 type StructSupports struct {
@@ -31,9 +32,12 @@ type StructSupports struct {
 }
 
 type FieldConfig struct {
-	name     string               `goacc:"required,get"`
-	docText  string               `goacc:"get,set"`
-	typeName string               `goacc:"required,get,set"`
+	name     string `goacc:"required,get"`
+	docText  string `goacc:"get,set"`
+	typeName string `goacc:"required,get,set"`
+
+	// If empty, it means no json tag.
+	jsonTag  string               `goacc:"required,get"`
 	features *FieldConfigFeatures `goacc:"required,get,set"`
 }
 

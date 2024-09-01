@@ -110,6 +110,7 @@ func NewStructConfigBuilder(
 	name string,
 	structSupports StructSupports,
 	mutexFieldName string,
+	enableMarshalJSON bool,
 	fields []FieldConfig,
 ) *StructConfigBuilder {
 	__sc := &StructConfig{}
@@ -117,6 +118,7 @@ func NewStructConfigBuilder(
 	__sc.name = name
 	__sc.structSupports = structSupports
 	__sc.mutexFieldName = mutexFieldName
+	__sc.enableMarshalJSON = enableMarshalJSON
 	__sc.fields = fields
 
 	return &StructConfigBuilder{__sc: __sc}
@@ -187,6 +189,14 @@ func (__sc *StructConfig) DefineFilename() string {
 func (__sc *StructConfig) MutexFieldName() string {
 	if __sc != nil {
 		return __sc.mutexFieldName
+	}
+
+	panic("StructConfig is nil")
+}
+
+func (__sc *StructConfig) EnableMarshalJson() bool {
+	if __sc != nil {
+		return __sc.enableMarshalJSON
 	}
 
 	panic("StructConfig is nil")
@@ -295,12 +305,14 @@ type FieldConfigBuilder struct {
 func NewFieldConfigBuilder(
 	name string,
 	typeName string,
+	jsonTag string,
 	features *FieldConfigFeatures,
 ) *FieldConfigBuilder {
 	__fc := &FieldConfig{}
 
 	__fc.name = name
 	__fc.typeName = typeName
+	__fc.jsonTag = jsonTag
 	__fc.features = features
 
 	return &FieldConfigBuilder{__fc: __fc}
@@ -341,6 +353,15 @@ func (__fc *FieldConfig) DocText() string {
 func (__fc *FieldConfig) TypeName() string {
 	if __fc != nil {
 		return __fc.typeName
+	}
+
+	panic("FieldConfig is nil")
+}
+
+// If empty, it means no json tag.
+func (__fc *FieldConfig) JsonTag() string {
+	if __fc != nil {
+		return __fc.jsonTag
 	}
 
 	panic("FieldConfig is nil")
