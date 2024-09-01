@@ -127,6 +127,7 @@ func (__scb *StructConfigBuilder) WithDocText(docText string) *StructConfigBuild
 		panic("StructConfigBuilder is nil")
 	} else if __scb.__sc != nil {
 		__scb.__sc.docText = docText
+		return __scb
 	}
 
 	panic("StructConfig has been already purged")
@@ -137,6 +138,7 @@ func (__scb *StructConfigBuilder) WithDefineFilename(defineFilename string) *Str
 		panic("StructConfigBuilder is nil")
 	} else if __scb.__sc != nil {
 		__scb.__sc.defineFilename = defineFilename
+		return __scb
 	}
 
 	panic("StructConfig has been already purged")
@@ -383,7 +385,6 @@ func NewFieldConfigFeaturesBuilder(
 	hasPtrGetter bool,
 	hasGetter bool,
 	hasSetter bool,
-	hasOverride bool,
 ) *FieldConfigFeaturesBuilder {
 	__fcf := &FieldConfigFeatures{}
 
@@ -393,7 +394,6 @@ func NewFieldConfigFeaturesBuilder(
 	__fcf.hasPtrGetter = hasPtrGetter
 	__fcf.hasGetter = hasGetter
 	__fcf.hasSetter = hasSetter
-	__fcf.hasOverride = hasOverride
 
 	return &FieldConfigFeaturesBuilder{__fcf: __fcf}
 }
@@ -457,14 +457,6 @@ func (__fcf *FieldConfigFeatures) HasGetter() bool {
 func (__fcf *FieldConfigFeatures) HasSetter() bool {
 	if __fcf != nil {
 		return __fcf.hasSetter
-	}
-
-	panic("FieldConfigFeatures is nil")
-}
-
-func (__fcf *FieldConfigFeatures) HasOverride() bool {
-	if __fcf != nil {
-		return __fcf.hasOverride
 	}
 
 	panic("FieldConfigFeatures is nil")

@@ -163,7 +163,7 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 
 func parseStructFieldTag(splitedTags []string) entity.FieldConfigFeatures {
 	if len(splitedTags) == 1 && splitedTags[0] == "-" {
-		return *entity.NewFieldConfigFeaturesBuilder(false, false, false, false, false, false, false).Purge()
+		return *entity.NewFieldConfigFeaturesBuilder(false, false, false, false, false, false).Purge()
 	}
 
 	return *entity.NewFieldConfigFeaturesBuilder(
@@ -173,7 +173,6 @@ func parseStructFieldTag(splitedTags []string) entity.FieldConfigFeatures {
 		slices.Contains(splitedTags, "getptr"),
 		slices.Contains(splitedTags, "get"),
 		slices.Contains(splitedTags, "set"),
-		slices.Contains(splitedTags, "override"),
 	).Purge()
 }
 

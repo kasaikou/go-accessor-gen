@@ -44,5 +44,4 @@ type FieldConfigFeatures struct {
 	hasPtrGetter bool `goacc:"required,get"`
 	hasGetter    bool `goacc:"required,get"`
 	hasSetter    bool `goacc:"required,get"`
-	hasOverride  bool `goacc:"required,get"`
 }
