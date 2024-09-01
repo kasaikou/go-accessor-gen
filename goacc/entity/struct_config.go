@@ -22,7 +22,7 @@ type StructConfig struct {
 	defineFilename    string         `goacc:"optional,get,set"`
 	structSupports    StructSupports `goacc:"required,getptr"`
 	mutexFieldName    string         `goacc:"required,get"`
-	enableMarshalJSON bool           `goacc:"optional,get"`
+	enableMarshalJSON bool           `goacc:"required,get"`
 	fields            []FieldConfig  `goacc:"required,get"`
 }
 

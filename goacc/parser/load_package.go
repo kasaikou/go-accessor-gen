@@ -115,6 +115,7 @@ func parseNamedStructType(object types.Object) (namedType *types.Named, structTy
 func parseStruct(namedType *types.Named, structType *types.Struct) entity.StructConfig {
 
 	structSupportsBuilder := entity.NewStructSupportsBuilder()
+	enableMarshalJSON := false
 
 	// Check init() and build() support.
 	for i := range namedType.NumMethods() {
@@ -150,6 +151,7 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		// Load json tag.
 		if parsedTag := regJsonTag.FindStringSubmatch(structType.Tag(i)); len(parsedTag) == 4 {
 			jsonTag = parsedTag[2]
+			enableMarshalJSON = true
 		}
 
 		fields = append(fields, *entity.NewFieldConfigBuilder(
@@ -164,6 +166,7 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		namedType.Obj().Name(),
 		*structSupportsBuilder.Purge(),
 		"",
+		enableMarshalJSON,
 		fields,
 	).Purge()
 }

@@ -110,6 +110,7 @@ func NewStructConfigBuilder(
 	name string,
 	structSupports StructSupports,
 	mutexFieldName string,
+	enableMarshalJSON bool,
 	fields []FieldConfig,
 ) *StructConfigBuilder {
 	__sc := &StructConfig{}
@@ -117,6 +118,7 @@ func NewStructConfigBuilder(
 	__sc.name = name
 	__sc.structSupports = structSupports
 	__sc.mutexFieldName = mutexFieldName
+	__sc.enableMarshalJSON = enableMarshalJSON
 	__sc.fields = fields
 
 	return &StructConfigBuilder{__sc: __sc}
@@ -138,17 +140,6 @@ func (__scb *StructConfigBuilder) WithDefineFilename(defineFilename string) *Str
 		panic("StructConfigBuilder is nil")
 	} else if __scb.__sc != nil {
 		__scb.__sc.defineFilename = defineFilename
-		return __scb
-	}
-
-	panic("StructConfig has been already purged")
-}
-
-func (__scb *StructConfigBuilder) WithEnableMarshalJson(enableMarshalJSON bool) *StructConfigBuilder {
-	if __scb == nil {
-		panic("StructConfigBuilder is nil")
-	} else if __scb.__sc != nil {
-		__scb.__sc.enableMarshalJSON = enableMarshalJSON
 		return __scb
 	}
 
@@ -367,6 +358,7 @@ func (__fc *FieldConfig) TypeName() string {
 	panic("FieldConfig is nil")
 }
 
+// If empty, it means no json tag.
 func (__fc *FieldConfig) JsonTag() string {
 	if __fc != nil {
 		return __fc.jsonTag
