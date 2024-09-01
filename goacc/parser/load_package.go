@@ -140,15 +140,22 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		fieldName := field.Name()
 		fieldType := field.Type()
 		features := parseStructFieldTag([]string{"-"})
+		jsonTag := ""
 
 		// Parse field tags.
 		if parsedTag := regGoaccTag.FindStringSubmatch(structType.Tag(i)); len(parsedTag) == 4 {
 			features = parseStructFieldTag(strings.Split(parsedTag[2], ","))
 		}
 
+		// Load json tag.
+		if parsedTag := regJsonTag.FindStringSubmatch(structType.Tag(i)); len(parsedTag) == 4 {
+			jsonTag = parsedTag[2]
+		}
+
 		fields = append(fields, *entity.NewFieldConfigBuilder(
 			fieldName,
 			fieldType.String(),
+			jsonTag,
 			&features,
 		).Purge())
 	}

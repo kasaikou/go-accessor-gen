@@ -144,6 +144,17 @@ func (__scb *StructConfigBuilder) WithDefineFilename(defineFilename string) *Str
 	panic("StructConfig has been already purged")
 }
 
+func (__scb *StructConfigBuilder) WithEnableMarshalJson(enableMarshalJSON bool) *StructConfigBuilder {
+	if __scb == nil {
+		panic("StructConfigBuilder is nil")
+	} else if __scb.__sc != nil {
+		__scb.__sc.enableMarshalJSON = enableMarshalJSON
+		return __scb
+	}
+
+	panic("StructConfig has been already purged")
+}
+
 // Purge purges StructConfig instance from StructConfigBuilder.
 //
 // If calls other method in StructConfigBuilder after Purge called, it will be panic.
@@ -187,6 +198,14 @@ func (__sc *StructConfig) DefineFilename() string {
 func (__sc *StructConfig) MutexFieldName() string {
 	if __sc != nil {
 		return __sc.mutexFieldName
+	}
+
+	panic("StructConfig is nil")
+}
+
+func (__sc *StructConfig) EnableMarshalJson() bool {
+	if __sc != nil {
+		return __sc.enableMarshalJSON
 	}
 
 	panic("StructConfig is nil")
@@ -295,12 +314,14 @@ type FieldConfigBuilder struct {
 func NewFieldConfigBuilder(
 	name string,
 	typeName string,
+	jsonTag string,
 	features *FieldConfigFeatures,
 ) *FieldConfigBuilder {
 	__fc := &FieldConfig{}
 
 	__fc.name = name
 	__fc.typeName = typeName
+	__fc.jsonTag = jsonTag
 	__fc.features = features
 
 	return &FieldConfigBuilder{__fc: __fc}
@@ -341,6 +362,14 @@ func (__fc *FieldConfig) DocText() string {
 func (__fc *FieldConfig) TypeName() string {
 	if __fc != nil {
 		return __fc.typeName
+	}
+
+	panic("FieldConfig is nil")
+}
+
+func (__fc *FieldConfig) JsonTag() string {
+	if __fc != nil {
+		return __fc.jsonTag
 	}
 
 	panic("FieldConfig is nil")
