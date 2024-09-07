@@ -16,10 +16,10 @@ import (
 var regGoaccTag = regexp.MustCompile(`(^|,)goacc:"(.*?)"($|,)`)
 var regJsonTag = regexp.MustCompile(`(^|,)json\((.*?)\)($|,)`)
 
-func LoadPackage(dirname string) (*packages.Package, error) {
+func LoadPackage(input *LoadPackageInput) (*packages.Package, error) {
 
 	const mode = packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesInfo
-	dir, err := filepath.Abs(dirname)
+	dir, err := filepath.Abs(input.dirname)
 	if err != nil {
 		return nil, err
 	}
@@ -40,12 +40,12 @@ func LoadPackage(dirname string) (*packages.Package, error) {
 	return pkgs[0], nil
 }
 
-func ParsePackage(pkg *packages.Package) []entity.FileConfig {
+func ParsePackage(input *ParsePackageInput) []entity.FileConfig {
 
 	files := []entity.FileConfig{}
-	for i := range pkg.GoFiles {
-		goFile := pkg.GoFiles[i]
-		syntax := pkg.Syntax[i]
+	for i := range input.pkg.GoFiles {
+		goFile := input.pkg.GoFiles[i]
+		syntax := input.pkg.Syntax[i]
 
 		imports := []entity.ImportConfig{}
 		structs := []entity.StructConfig{}
@@ -61,11 +61,11 @@ func ParsePackage(pkg *packages.Package) []entity.FileConfig {
 				return false
 
 			case *ast.TypeSpec:
-				namedType, structType, isValid := parseNamedStructType(pkg.TypesInfo.ObjectOf(node.Name))
+				namedType, structType, isValid := parseNamedStructType(input.pkg.TypesInfo.ObjectOf(node.Name))
 				if !isValid {
 					break
 				}
-				structConfig := parseStruct(namedType, structType)
+				structConfig := parseStruct(namedType, structType, input.defaultTag)
 
 				// Set struct metadata into structConfig.
 				structConfig.SetDefineFilename(goFile)
@@ -92,7 +92,7 @@ func ParsePackage(pkg *packages.Package) []entity.FileConfig {
 			return true
 		})
 
-		files = append(files, *entity.NewFileConfigBuilder(goFile, pkg.Name, imports, structs).Purge())
+		files = append(files, *entity.NewFileConfigBuilder(goFile, input.pkg.Name, imports, structs).Purge())
 	}
 
 	return files
@@ -112,7 +112,7 @@ func parseNamedStructType(object types.Object) (namedType *types.Named, structTy
 	return namedType, structType, true
 }
 
-func parseStruct(namedType *types.Named, structType *types.Struct) entity.StructConfig {
+func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag string) entity.StructConfig {
 
 	structSupportsBuilder := entity.NewStructSupportsBuilder()
 	enableMarshalJSON := false
@@ -140,31 +140,31 @@ func parseStruct(namedType *types.Named, structType *types.Struct) entity.Struct
 		field := structType.Field(i)
 		fieldName := field.Name()
 		fieldType := field.Type()
-		features := parseStructFieldTag([]string{"-"})
+		fieldTag := defaultTag
 		jsonTag := "-"
 
 		// Parse field tags.
 		if parsedTagResult := regGoaccTag.FindStringSubmatch(structType.Tag(i)); len(parsedTagResult) == 4 {
-			parsedTag := parsedTagResult[2]
+			fieldTag = parsedTagResult[2]
+		}
 
-			splitedTags := strings.Split(parsedTag, ",")
-			features = parseStructFieldTag(splitedTags)
+		splitedFieldTags := strings.Split(fieldTag, ",")
+		features := parseStructFieldTag(splitedFieldTags)
 
-			// Parse json tag.
-			if parsedJsonTagResult := regJsonTag.FindStringSubmatch(parsedTag); len(parsedJsonTagResult) == 4 {
-				switch parsedJsonTag := parsedJsonTagResult[2]; parsedJsonTag {
-				case "":
-					jsonTag = field.Name()
-				case ",omitempty":
-					jsonTag = field.Name() + ",omitempty"
-				default:
-					jsonTag = parsedJsonTag
-				}
-				enableMarshalJSON = true
-			} else if slices.Contains(splitedTags, "json") {
+		// Parse json tag.
+		if parsedJsonTagResult := regJsonTag.FindStringSubmatch(fieldTag); len(parsedJsonTagResult) == 4 {
+			switch parsedJsonTag := parsedJsonTagResult[2]; parsedJsonTag {
+			case "":
 				jsonTag = field.Name()
-				enableMarshalJSON = true
+			case ",omitempty":
+				jsonTag = field.Name() + ",omitempty"
+			default:
+				jsonTag = parsedJsonTag
 			}
+			enableMarshalJSON = true
+		} else if slices.Contains(splitedFieldTags, "json") {
+			jsonTag = field.Name()
+			enableMarshalJSON = true
 		}
 
 		fields = append(fields, *entity.NewFieldConfigBuilder(
