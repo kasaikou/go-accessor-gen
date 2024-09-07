@@ -11,14 +11,14 @@ type GenerateConfigBuilder struct {
 // NewGenerateConfigBuilder creates an GenerateConfigBuilder instance.
 func NewGenerateConfigBuilder(
 	includePattern string,
-	defaultLabel string,
+	defaultTag string,
 ) *GenerateConfigBuilder {
 	__gc := &GenerateConfig{}
 
 	__gc.goaccPreNewHook() // This function calls your defined hook.
 
 	__gc.includePattern = includePattern
-	__gc.defaultLabel = defaultLabel
+	__gc.defaultTag = defaultTag
 
 	return &GenerateConfigBuilder{__gc: __gc}
 }
@@ -47,9 +47,9 @@ func (__gc *GenerateConfig) IncludePattern() string {
 	panic("GenerateConfig is nil")
 }
 
-func (__gc *GenerateConfig) DefaultLabel() string {
+func (__gc *GenerateConfig) DefaultTag() string {
 	if __gc != nil {
-		return __gc.defaultLabel
+		return __gc.defaultTag
 	}
 
 	panic("GenerateConfig is nil")
@@ -59,11 +59,11 @@ func (__gc *GenerateConfig) MarshalJSON() ([]byte, error) {
 
 	type GenerateConfigJSONContent struct {
 		IncludePattern string `json:"includePattern"`
-		DefaultLabel   string `json:"defaultLabel"`
+		DefaultTag     string `json:"defaultTag"`
 	}
 
 	return json.Marshal(GenerateConfigJSONContent{
 		IncludePattern: __gc.includePattern,
-		DefaultLabel:   __gc.defaultLabel,
+		DefaultTag:     __gc.defaultTag,
 	})
 }
