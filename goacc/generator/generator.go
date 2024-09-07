@@ -1,3 +1,4 @@
+//go:generate goacc -i generator.go
 package generator
 
 import (
@@ -11,14 +12,13 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-func NewGenerator() *Generator {
-	return &Generator{
-		cache: make(map[string]*entity.FileConfig),
-	}
+type Generator struct {
+	config *entity.GenerateConfig        `goacc:"required,json"`
+	cache  map[string]*entity.FileConfig `goacc:"json"`
 }
 
-type Generator struct {
-	cache map[string]*entity.FileConfig
+func (g *Generator) goaccPreNewHook() {
+	g.cache = make(map[string]*entity.FileConfig)
 }
 
 func (g *Generator) Generate(srcFilename string) (destFilename string, b []byte) {
