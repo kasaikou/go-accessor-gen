@@ -18,6 +18,8 @@ import (
 )
 
 func Check(config *entity.CheckConfig) {
+	exitCode := 0
+
 	g := generator.NewGenerator()
 	doublestar.GlobWalk(os.DirFS(config.WorkingDir()), config.IncludePattern(), func(path string, d fs.DirEntry) error {
 		if !d.IsDir() {
@@ -52,17 +54,23 @@ func Check(config *entity.CheckConfig) {
 				case expect == nil && current == nil:
 				case expect == nil && current != nil:
 					fmt.Printf("%s is should not be existed\n", goaccPath)
+					exitCode = 1
 				case expect != nil && current == nil:
 					fmt.Printf("%s is should be generated\n", goaccPath)
+					exitCode = 1
 				default:
 					if diff := cmp.Diff(string(current), string(expect)); diff != "" {
 						fmt.Printf("%s is different with expected.\n", goaccPath)
 						fmt.Println(diff)
-						os.Exit(1)
+						exitCode = 1
 					}
 				}
 			}
 		}
 		return nil
 	})
+
+	if exitCode != 0 {
+		os.Exit(exitCode)
+	}
 }
