@@ -8,7 +8,7 @@ import (
 	"github.com/ettle/strcase"
 )
 
-func renameDestFilename(srcFilename string) string {
+func RenameDestFilename(srcFilename string) string {
 	if substr, isCut := strings.CutSuffix(srcFilename, "_test.go"); isCut {
 		return substr + "_goacc_test.go"
 	} else if substr, isCut := strings.CutSuffix(srcFilename, ".go"); isCut {
