@@ -10,6 +10,7 @@ type GenerateConfigBuilder struct {
 
 // NewGenerateConfigBuilder creates an GenerateConfigBuilder instance.
 func NewGenerateConfigBuilder(
+	workingDir string,
 	includePattern string,
 	defaultTag string,
 ) *GenerateConfigBuilder {
@@ -17,6 +18,7 @@ func NewGenerateConfigBuilder(
 
 	__gc.goaccPreNewHook() // This function calls your defined hook.
 
+	__gc.workingDir = workingDir
 	__gc.includePattern = includePattern
 	__gc.defaultTag = defaultTag
 
@@ -39,6 +41,14 @@ func (__gcb *GenerateConfigBuilder) Purge() *GenerateConfig {
 	panic("GenerateConfig has been already purged")
 }
 
+func (__gc *GenerateConfig) WorkingDir() string {
+	if __gc != nil {
+		return __gc.workingDir
+	}
+
+	panic("GenerateConfig is nil")
+}
+
 func (__gc *GenerateConfig) IncludePattern() string {
 	if __gc != nil {
 		return __gc.includePattern
@@ -58,11 +68,13 @@ func (__gc *GenerateConfig) DefaultTag() string {
 func (__gc *GenerateConfig) MarshalJSON() ([]byte, error) {
 
 	type GenerateConfigJSONContent struct {
+		WorkingDir     string `json:"workingDir"`
 		IncludePattern string `json:"includePattern"`
 		DefaultTag     string `json:"defaultTag"`
 	}
 
 	return json.Marshal(GenerateConfigJSONContent{
+		WorkingDir:     __gc.workingDir,
 		IncludePattern: __gc.includePattern,
 		DefaultTag:     __gc.defaultTag,
 	})

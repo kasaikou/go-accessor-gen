@@ -7,49 +7,13 @@ import (
 	"github.com/kasaikou/goacc/goacc/entity"
 )
 
-// GeneratorBuilder is an instance for generating an instance of Generator.
-type GeneratorBuilder struct {
-	__g *Generator
-}
-
-// NewGeneratorBuilder creates an GeneratorBuilder instance.
-func NewGeneratorBuilder(
-	config *entity.GenerateConfig,
-) *GeneratorBuilder {
-	__g := &Generator{}
-
-	__g.goaccPreNewHook() // This function calls your defined hook.
-
-	__g.config = config
-
-	return &GeneratorBuilder{__g: __g}
-}
-
-// Purge purges Generator instance from GeneratorBuilder.
-//
-// If calls other method in GeneratorBuilder after Purge called, it will be panic.
-func (__gb *GeneratorBuilder) Purge() *Generator {
-	if __gb == nil {
-		panic("GeneratorBuilder is nil")
-	} else if __gb.__g != nil {
-		__g := __gb.__g
-		__gb.__g = nil
-
-		return __g
-	}
-
-	panic("Generator has been already purged")
-}
-
 func (__g *Generator) MarshalJSON() ([]byte, error) {
 
 	type GeneratorJSONContent struct {
-		Config *entity.GenerateConfig        `json:"config"`
-		Cache  map[string]*entity.FileConfig `json:"cache"`
+		Cache map[string]*entity.FileConfig `json:"cache"`
 	}
 
 	return json.Marshal(GeneratorJSONContent{
-		Config: __g.config,
-		Cache:  __g.cache,
+		Cache: __g.cache,
 	})
 }
