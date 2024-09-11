@@ -26,8 +26,8 @@ func NewAnimalBuilder(
 	return &AnimalBuilder{__a: __a}
 }
 
-// WithName of animal
-func (__ab *AnimalBuilder) WithName(name string) *AnimalBuilder {
+// SetName of animal
+func (__ab *AnimalBuilder) SetName(name string) *AnimalBuilder {
 	if __ab == nil {
 		panic("AnimalBuilder is nil")
 	} else if __ab.__a != nil {
@@ -38,8 +38,8 @@ func (__ab *AnimalBuilder) WithName(name string) *AnimalBuilder {
 	panic("Animal has been already purged")
 }
 
-// WithKind of animal
-func (__ab *AnimalBuilder) WithKind(kind string) *AnimalBuilder {
+// SetKind of animal
+func (__ab *AnimalBuilder) SetKind(kind string) *AnimalBuilder {
 	if __ab == nil {
 		panic("AnimalBuilder is nil")
 	} else if __ab.__a != nil {
@@ -53,7 +53,7 @@ func (__ab *AnimalBuilder) WithKind(kind string) *AnimalBuilder {
 // Purge purges Animal instance from AnimalBuilder.
 //
 // If calls other method in AnimalBuilder after Purge called, it will be panic.
-func (__ab *AnimalBuilder) Purge() *Animal {
+func (__ab *AnimalBuilder) Build() *Animal {
 	if __ab == nil {
 		panic("AnimalBuilder is nil")
 	} else if __ab.__a != nil {

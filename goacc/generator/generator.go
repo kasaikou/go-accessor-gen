@@ -44,7 +44,7 @@ func (g *Generator) Generate(srcFilename string, generateConfig *entity.Generate
 	fprintfln(buffer, "package %s", config.PackageName())
 	fprintfln(buffer, "")
 
-	empty := buffer.Bytes()
+	emptyLength := buffer.Len()
 
 	for _, structConfig := range config.Structs() {
 		generateNew(buffer, structConfig)
@@ -53,6 +53,10 @@ func (g *Generator) Generate(srcFilename string, generateConfig *entity.Generate
 	}
 	destFilename = RenameDestFilename(srcFilename)
 
+	if buffer.Len() == emptyLength {
+		return destFilename, nil
+	}
+
 	b, err := format.Source(buffer.Bytes())
 	if err != nil {
 		// debug code
@@ -60,8 +64,6 @@ func (g *Generator) Generate(srcFilename string, generateConfig *entity.Generate
 			panic(err.Error() + ", and " + writeErr.Error())
 		}
 		panic(err.Error())
-	} else if len(b) == len(empty) {
-		return destFilename, nil
 	}
 
 	b, err = imports.Process(destFilename, b, nil)
@@ -76,7 +78,7 @@ func (g *Generator) loadFile(srcFilename string, generateConfig *entity.Generate
 	dirname := filepath.Dir(srcFilename)
 	pkg, err := parser.LoadPackage(parser.NewLoadPackageInputBuilder(
 		dirname,
-	).Purge())
+	).Build())
 	if err != nil {
 		panic(err.Error())
 	}
@@ -85,7 +87,7 @@ func (g *Generator) loadFile(srcFilename string, generateConfig *entity.Generate
 		parser.NewParsePackageInputBuilder(
 			pkg,
 			generateConfig.DefaultTag(),
-		).Purge(),
+		).Build(),
 	)
 
 	for _, file := range fileConfigs {

@@ -33,7 +33,7 @@ func Check(config *entity.CheckConfig) {
 				if err != nil {
 					if errors.Is(err, fs.ErrNotExist) {
 						current = nil
-						meta = entity.NewMetadataBuilder().Purge()
+						meta = entity.NewMetadataBuilder().Build()
 					} else {
 						panic(err)
 					}
@@ -48,7 +48,7 @@ func Check(config *entity.CheckConfig) {
 					config.WorkingDir(),
 					config.IncludePattern(),
 					meta.DefaultTag(),
-				).Purge())
+				).Build())
 
 				switch {
 				case expect == nil && current == nil:

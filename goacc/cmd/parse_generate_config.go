@@ -19,5 +19,5 @@ func ParseGenerateFlag(args []string) *entity.GenerateConfig {
 		wd,
 		*includePattern,
 		*defaultTag,
-	).Purge()
+	).Build()
 }

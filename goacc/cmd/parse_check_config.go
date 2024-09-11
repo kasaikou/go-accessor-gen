@@ -16,5 +16,5 @@ func ParseCheckFlag(args []string) *entity.CheckConfig {
 	return entity.NewCheckConfigBuilder(
 		wd,
 		*includePattern,
-	).Purge()
+	).Build()
 }
