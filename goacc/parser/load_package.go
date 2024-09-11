@@ -112,6 +112,8 @@ func parseNamedStructType(object types.Object) (namedType *types.Named, structTy
 	return namedType, structType, true
 }
 
+var errType = types.Universe.Lookup("error").Type()
+
 func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag string) entity.StructConfig {
 
 	structSupportsBuilder := entity.NewStructSupportsBuilder()
@@ -130,6 +132,10 @@ func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag st
 			signature := method.Signature()
 			if signature.Params().Len() == 0 && signature.Results().Len() == 0 {
 				structSupportsBuilder.SetHasPostNewHook(true)
+			} else if signature.Params().Len() == 0 && signature.Results().Len() == 1 {
+				if signatureResult := signature.Results().At(0); types.AssignableTo(signatureResult.Type(), errType) {
+					structSupportsBuilder.SetHasPostNewHookError(true)
+				}
 			}
 		}
 	}

@@ -27,8 +27,9 @@ type StructConfig struct {
 }
 
 type StructSupports struct {
-	hasPreNewHook  bool `goacc:"optional,get"`
-	hasPostNewHook bool `goacc:"optional,get"`
+	hasPreNewHook       bool `goacc:"optional,get"`
+	hasPostNewHook      bool `goacc:"optional,get"`
+	hasPostNewHookError bool `goacc:"optional,get"`
 }
 
 type FieldConfig struct {
