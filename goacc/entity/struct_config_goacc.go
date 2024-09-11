@@ -265,6 +265,17 @@ func (__ssb *StructSupportsBuilder) SetHasPostNewHook(hasPostNewHook bool) *Stru
 	panic("StructSupports has been already purged")
 }
 
+func (__ssb *StructSupportsBuilder) SetHasPostNewHookError(hasPostNewHookError bool) *StructSupportsBuilder {
+	if __ssb == nil {
+		panic("StructSupportsBuilder is nil")
+	} else if __ssb.__ss != nil {
+		__ssb.__ss.hasPostNewHookError = hasPostNewHookError
+		return __ssb
+	}
+
+	panic("StructSupports has been already purged")
+}
+
 // Purge purges StructSupports instance from StructSupportsBuilder.
 //
 // If calls other method in StructSupportsBuilder after Purge called, it will be panic.
@@ -292,6 +303,14 @@ func (__ss *StructSupports) HasPreNewHook() bool {
 func (__ss *StructSupports) HasPostNewHook() bool {
 	if __ss != nil {
 		return __ss.hasPostNewHook
+	}
+
+	panic("StructSupports is nil")
+}
+
+func (__ss *StructSupports) HasPostNewHookError() bool {
+	if __ss != nil {
+		return __ss.hasPostNewHookError
 	}
 
 	panic("StructSupports is nil")

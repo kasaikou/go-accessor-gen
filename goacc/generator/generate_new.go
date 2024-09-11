@@ -102,11 +102,17 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 
 	// Creates (PiyoPiyoBuilder).Purge() function.
 	fprintfln(dest, convertToComment(`
-		Purge purges %s instance from %s.
+		Build purges %s instance from %s.
 
 		If calls other method in %s after Purge called, it will be panic.
 	`), structType, builderType, builderType)
-	fprintfln(dest, "func (%s *%s) Build() *%s {", recieverName, builderType, structType)
+
+	if structConfig.StructSupportsPtr().HasPostNewHookError() {
+		fprintfln(dest, "func (%s *%s) Build() (*%s, error) {", recieverName, builderType, structType)
+	} else {
+		fprintfln(dest, "func (%s *%s) Build() *%s {", recieverName, builderType, structType)
+	}
+
 	{
 		fprintfln(dest, "if %s == nil {", recieverName)
 		{
@@ -118,12 +124,18 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 			fprintfln(dest, "%s.%s = nil", recieverName, identFieldStruct)
 			fprintfln(dest, "")
 
-			if structConfig.StructSupportsPtr().HasPostNewHook() {
-				fprintfln(dest, "%s.goaccPostNewHook() // This function calls your defined hook.", identFieldStruct)
-				fprintfln(dest, "")
-			}
+			if structConfig.StructSupportsPtr().HasPostNewHookError() {
+				fprintfln(dest, "err := %s.goaccPostNewHook() // This function calls your defined hook.", identFieldStruct)
+				fprintfln(dest, "return %s, err", identFieldStruct)
 
-			fprintfln(dest, "return %s", identFieldStruct)
+			} else {
+				if structConfig.StructSupportsPtr().HasPostNewHook() {
+					fprintfln(dest, "%s.goaccPostNewHook() // This function calls your defined hook.", identFieldStruct)
+					fprintfln(dest, "")
+				}
+				fprintfln(dest, "return %s", identFieldStruct)
+
+			}
 		}
 		fprintfln(dest, "}")
 		fprintfln(dest, "")
