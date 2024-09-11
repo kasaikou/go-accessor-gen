@@ -18,10 +18,10 @@ func ParseMetadata(r io.Reader) *entity.Metadata {
 	for s := bufio.NewScanner(r); s.Scan(); {
 		line := s.Text()
 		if strings.HasPrefix(line, prefixPackage) {
-			return builder.Purge()
+			return builder.Build()
 
 		} else if defaultTag, isCut := strings.CutPrefix(line, prefixDefaultTag); isCut {
-			builder.WithDefaultTag(defaultTag)
+			builder.SetDefaultTag(defaultTag)
 
 		}
 	}

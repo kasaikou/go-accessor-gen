@@ -20,7 +20,7 @@ func NewSampleBuilder(
 	return &SampleBuilder{__s: __s}
 }
 
-func (__sb *SampleBuilder) WithPiyo(piyo int) *SampleBuilder {
+func (__sb *SampleBuilder) SetPiyo(piyo int) *SampleBuilder {
 	if __sb == nil {
 		panic("SampleBuilder is nil")
 	} else if __sb.__s != nil {
@@ -31,7 +31,7 @@ func (__sb *SampleBuilder) WithPiyo(piyo int) *SampleBuilder {
 	panic("Sample has been already purged")
 }
 
-func (__sb *SampleBuilder) WithHoge(hoge string) *SampleBuilder {
+func (__sb *SampleBuilder) SetHoge(hoge string) *SampleBuilder {
 	if __sb == nil {
 		panic("SampleBuilder is nil")
 	} else if __sb.__s != nil {
@@ -45,7 +45,7 @@ func (__sb *SampleBuilder) WithHoge(hoge string) *SampleBuilder {
 // Purge purges Sample instance from SampleBuilder.
 //
 // If calls other method in SampleBuilder after Purge called, it will be panic.
-func (__sb *SampleBuilder) Purge() *Sample {
+func (__sb *SampleBuilder) Build() *Sample {
 	if __sb == nil {
 		panic("SampleBuilder is nil")
 	} else if __sb.__s != nil {

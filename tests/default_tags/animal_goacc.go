@@ -33,7 +33,7 @@ func NewAnimalBuilder(
 // Purge purges Animal instance from AnimalBuilder.
 //
 // If calls other method in AnimalBuilder after Purge called, it will be panic.
-func (__ab *AnimalBuilder) Purge() *Animal {
+func (__ab *AnimalBuilder) Build() *Animal {
 	if __ab == nil {
 		panic("AnimalBuilder is nil")
 	} else if __ab.__a != nil {

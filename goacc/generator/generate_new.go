@@ -74,7 +74,7 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 
 	// Creates (PiyoPiyoBuilder).WithHogeHoge() functions.
 	for _, field := range optionalFields {
-		withName := "With" + renameToPascalCase(field.Name())
+		withName := "Set" + renameToPascalCase(field.Name())
 		if comment := field.DocText(); comment != "" {
 			fprintfln(dest, strings.ReplaceAll(convertToComment(comment), field.Name(), withName))
 		}
@@ -106,7 +106,7 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 
 		If calls other method in %s after Purge called, it will be panic.
 	`), structType, builderType, builderType)
-	fprintfln(dest, "func (%s *%s) Purge() *%s {", recieverName, builderType, structType)
+	fprintfln(dest, "func (%s *%s) Build() *%s {", recieverName, builderType, structType)
 	{
 		fprintfln(dest, "if %s == nil {", recieverName)
 		{

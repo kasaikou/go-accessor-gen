@@ -57,7 +57,7 @@ func ParsePackage(input *ParsePackageInput) []entity.FileConfig {
 				if node.Name != nil {
 					name = node.Name.Name
 				}
-				imports = append(imports, *entity.NewImportConfigBuilder(name, node.Path.Value).Purge())
+				imports = append(imports, *entity.NewImportConfigBuilder(name, node.Path.Value).Build())
 				return false
 
 			case *ast.TypeSpec:
@@ -92,7 +92,7 @@ func ParsePackage(input *ParsePackageInput) []entity.FileConfig {
 			return true
 		})
 
-		files = append(files, *entity.NewFileConfigBuilder(goFile, input.pkg.Name, imports, structs).Purge())
+		files = append(files, *entity.NewFileConfigBuilder(goFile, input.pkg.Name, imports, structs).Build())
 	}
 
 	return files
@@ -124,12 +124,12 @@ func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag st
 		case "goaccPreNewHook":
 			signature := method.Signature()
 			if signature.Params().Len() == 0 && signature.Results().Len() == 0 {
-				structSupportsBuilder.WithHasPreNewHook(true)
+				structSupportsBuilder.SetHasPreNewHook(true)
 			}
 		case "goaccPostNewHook":
 			signature := method.Signature()
 			if signature.Params().Len() == 0 && signature.Results().Len() == 0 {
-				structSupportsBuilder.WithHasPostNewHook(true)
+				structSupportsBuilder.SetHasPostNewHook(true)
 			}
 		}
 	}
@@ -172,21 +172,21 @@ func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag st
 			fieldType.String(),
 			jsonTag,
 			&features,
-		).Purge())
+		).Build())
 	}
 
 	return *entity.NewStructConfigBuilder(
 		namedType.Obj().Name(),
-		*structSupportsBuilder.Purge(),
+		*structSupportsBuilder.Build(),
 		"",
 		enableMarshalJSON,
 		fields,
-	).Purge()
+	).Build()
 }
 
 func parseStructFieldTag(splitedTags []string) entity.FieldConfigFeatures {
 	if len(splitedTags) == 1 && splitedTags[0] == "-" {
-		return *entity.NewFieldConfigFeaturesBuilder(false, false, false, false, false, false).Purge()
+		return *entity.NewFieldConfigFeaturesBuilder(false, false, false, false, false, false).Build()
 	}
 
 	return *entity.NewFieldConfigFeaturesBuilder(
@@ -196,5 +196,5 @@ func parseStructFieldTag(splitedTags []string) entity.FieldConfigFeatures {
 		slices.Contains(splitedTags, "getptr"),
 		slices.Contains(splitedTags, "get"),
 		slices.Contains(splitedTags, "set"),
-	).Purge()
+	).Build()
 }
