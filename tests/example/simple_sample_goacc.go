@@ -4,25 +4,31 @@ package tests
 
 import "encoding/json"
 
-// SampleBuilder is an instance for generating an instance of Sample.
-type SampleBuilder struct {
+type SampleBuilder interface {
+	SetPiyo(piyo int) SampleBuilder
+	SetHoge(hoge string) SampleBuilder
+	Build() *Sample
+}
+
+// sampleBuilderImpl is an instance for generating an instance of Sample.
+type sampleBuilderImpl struct {
 	__s *Sample
 }
 
 // NewSampleBuilder creates an SampleBuilder instance.
 func NewSampleBuilder(
 	name string,
-) *SampleBuilder {
+) SampleBuilder {
 	__s := &Sample{}
 
 	__s.name = name
 
-	return &SampleBuilder{__s: __s}
+	return &sampleBuilderImpl{__s: __s}
 }
 
-func (__sb *SampleBuilder) SetPiyo(piyo int) *SampleBuilder {
+func (__sb *sampleBuilderImpl) SetPiyo(piyo int) SampleBuilder {
 	if __sb == nil {
-		panic("SampleBuilder is nil")
+		panic("sampleBuilderImpl is nil")
 	} else if __sb.__s != nil {
 		__sb.__s.piyo = piyo
 		return __sb
@@ -31,9 +37,9 @@ func (__sb *SampleBuilder) SetPiyo(piyo int) *SampleBuilder {
 	panic("Sample has been already purged")
 }
 
-func (__sb *SampleBuilder) SetHoge(hoge string) *SampleBuilder {
+func (__sb *sampleBuilderImpl) SetHoge(hoge string) SampleBuilder {
 	if __sb == nil {
-		panic("SampleBuilder is nil")
+		panic("sampleBuilderImpl is nil")
 	} else if __sb.__s != nil {
 		__sb.__s.hoge = hoge
 		return __sb
@@ -42,12 +48,12 @@ func (__sb *SampleBuilder) SetHoge(hoge string) *SampleBuilder {
 	panic("Sample has been already purged")
 }
 
-// Purge purges Sample instance from SampleBuilder.
+// Build purges Sample instance from sampleBuilderImpl.
 //
-// If calls other method in SampleBuilder after Purge called, it will be panic.
-func (__sb *SampleBuilder) Build() *Sample {
+// If calls other method in sampleBuilderImpl after Purge called, it will be panic.
+func (__sb *sampleBuilderImpl) Build() *Sample {
 	if __sb == nil {
-		panic("SampleBuilder is nil")
+		panic("sampleBuilderImpl is nil")
 	} else if __sb.__s != nil {
 		__s := __sb.__s
 		__sb.__s = nil

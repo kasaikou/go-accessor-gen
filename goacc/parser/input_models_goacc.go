@@ -8,28 +8,32 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// LoadPackageInputBuilder is an instance for generating an instance of LoadPackageInput.
-type LoadPackageInputBuilder struct {
+type LoadPackageInputBuilder interface {
+	Build() *LoadPackageInput
+}
+
+// loadPackageInputBuilderImpl is an instance for generating an instance of LoadPackageInput.
+type loadPackageInputBuilderImpl struct {
 	__lpi *LoadPackageInput
 }
 
 // NewLoadPackageInputBuilder creates an LoadPackageInputBuilder instance.
 func NewLoadPackageInputBuilder(
 	dirname string,
-) *LoadPackageInputBuilder {
+) LoadPackageInputBuilder {
 	__lpi := &LoadPackageInput{}
 
 	__lpi.dirname = dirname
 
-	return &LoadPackageInputBuilder{__lpi: __lpi}
+	return &loadPackageInputBuilderImpl{__lpi: __lpi}
 }
 
-// Purge purges LoadPackageInput instance from LoadPackageInputBuilder.
+// Build purges LoadPackageInput instance from loadPackageInputBuilderImpl.
 //
-// If calls other method in LoadPackageInputBuilder after Purge called, it will be panic.
-func (__lpib *LoadPackageInputBuilder) Build() *LoadPackageInput {
+// If calls other method in loadPackageInputBuilderImpl after Purge called, it will be panic.
+func (__lpib *loadPackageInputBuilderImpl) Build() *LoadPackageInput {
 	if __lpib == nil {
-		panic("LoadPackageInputBuilder is nil")
+		panic("loadPackageInputBuilderImpl is nil")
 	} else if __lpib.__lpi != nil {
 		__lpi := __lpib.__lpi
 		__lpib.__lpi = nil
@@ -51,8 +55,12 @@ func (__lpi *LoadPackageInput) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// ParsePackageInputBuilder is an instance for generating an instance of ParsePackageInput.
-type ParsePackageInputBuilder struct {
+type ParsePackageInputBuilder interface {
+	Build() *ParsePackageInput
+}
+
+// parsePackageInputBuilderImpl is an instance for generating an instance of ParsePackageInput.
+type parsePackageInputBuilderImpl struct {
 	__ppi *ParsePackageInput
 }
 
@@ -60,21 +68,21 @@ type ParsePackageInputBuilder struct {
 func NewParsePackageInputBuilder(
 	pkg *packages.Package,
 	defaultTag string,
-) *ParsePackageInputBuilder {
+) ParsePackageInputBuilder {
 	__ppi := &ParsePackageInput{}
 
 	__ppi.pkg = pkg
 	__ppi.defaultTag = defaultTag
 
-	return &ParsePackageInputBuilder{__ppi: __ppi}
+	return &parsePackageInputBuilderImpl{__ppi: __ppi}
 }
 
-// Purge purges ParsePackageInput instance from ParsePackageInputBuilder.
+// Build purges ParsePackageInput instance from parsePackageInputBuilderImpl.
 //
-// If calls other method in ParsePackageInputBuilder after Purge called, it will be panic.
-func (__ppib *ParsePackageInputBuilder) Build() *ParsePackageInput {
+// If calls other method in parsePackageInputBuilderImpl after Purge called, it will be panic.
+func (__ppib *parsePackageInputBuilderImpl) Build() *ParsePackageInput {
 	if __ppib == nil {
-		panic("ParsePackageInputBuilder is nil")
+		panic("parsePackageInputBuilderImpl is nil")
 	} else if __ppib.__ppi != nil {
 		__ppi := __ppib.__ppi
 		__ppib.__ppi = nil

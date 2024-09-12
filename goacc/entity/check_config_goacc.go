@@ -4,8 +4,12 @@ package entity
 
 import "encoding/json"
 
-// CheckConfigBuilder is an instance for generating an instance of CheckConfig.
-type CheckConfigBuilder struct {
+type CheckConfigBuilder interface {
+	Build() *CheckConfig
+}
+
+// checkConfigBuilderImpl is an instance for generating an instance of CheckConfig.
+type checkConfigBuilderImpl struct {
 	__cc *CheckConfig
 }
 
@@ -13,21 +17,21 @@ type CheckConfigBuilder struct {
 func NewCheckConfigBuilder(
 	workingDir string,
 	includePattern string,
-) *CheckConfigBuilder {
+) CheckConfigBuilder {
 	__cc := &CheckConfig{}
 
 	__cc.workingDir = workingDir
 	__cc.includePattern = includePattern
 
-	return &CheckConfigBuilder{__cc: __cc}
+	return &checkConfigBuilderImpl{__cc: __cc}
 }
 
-// Purge purges CheckConfig instance from CheckConfigBuilder.
+// Build purges CheckConfig instance from checkConfigBuilderImpl.
 //
-// If calls other method in CheckConfigBuilder after Purge called, it will be panic.
-func (__ccb *CheckConfigBuilder) Build() *CheckConfig {
+// If calls other method in checkConfigBuilderImpl after Purge called, it will be panic.
+func (__ccb *checkConfigBuilderImpl) Build() *CheckConfig {
 	if __ccb == nil {
-		panic("CheckConfigBuilder is nil")
+		panic("checkConfigBuilderImpl is nil")
 	} else if __ccb.__cc != nil {
 		__cc := __ccb.__cc
 		__ccb.__cc = nil

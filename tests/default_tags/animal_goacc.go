@@ -8,8 +8,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// AnimalBuilder is an instance for generating an instance of Animal.
-type AnimalBuilder struct {
+type AnimalBuilder interface {
+	Build() *Animal
+}
+
+// animalBuilderImpl is an instance for generating an instance of Animal.
+type animalBuilderImpl struct {
 	__a *Animal
 }
 
@@ -18,7 +22,7 @@ func NewAnimalBuilder(
 	id uuid.UUID,
 	name string,
 	kind string,
-) *AnimalBuilder {
+) AnimalBuilder {
 	__a := &Animal{}
 
 	__a.goaccPreNewHook() // This function calls your defined hook.
@@ -27,15 +31,15 @@ func NewAnimalBuilder(
 	__a.name = name
 	__a.kind = kind
 
-	return &AnimalBuilder{__a: __a}
+	return &animalBuilderImpl{__a: __a}
 }
 
-// Purge purges Animal instance from AnimalBuilder.
+// Build purges Animal instance from animalBuilderImpl.
 //
-// If calls other method in AnimalBuilder after Purge called, it will be panic.
-func (__ab *AnimalBuilder) Build() *Animal {
+// If calls other method in animalBuilderImpl after Purge called, it will be panic.
+func (__ab *animalBuilderImpl) Build() *Animal {
 	if __ab == nil {
-		panic("AnimalBuilder is nil")
+		panic("animalBuilderImpl is nil")
 	} else if __ab.__a != nil {
 		__a := __ab.__a
 		__ab.__a = nil

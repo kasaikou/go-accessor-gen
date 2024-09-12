@@ -2,8 +2,12 @@
 // defaultTag=-
 package entity
 
-// FileConfigBuilder is an instance for generating an instance of FileConfig.
-type FileConfigBuilder struct {
+type FileConfigBuilder interface {
+	Build() *FileConfig
+}
+
+// fileConfigBuilderImpl is an instance for generating an instance of FileConfig.
+type fileConfigBuilderImpl struct {
 	__fc *FileConfig
 }
 
@@ -13,7 +17,7 @@ func NewFileConfigBuilder(
 	packageName string,
 	imports []ImportConfig,
 	structs []StructConfig,
-) *FileConfigBuilder {
+) FileConfigBuilder {
 	__fc := &FileConfig{}
 
 	__fc.filename = filename
@@ -21,15 +25,15 @@ func NewFileConfigBuilder(
 	__fc.imports = imports
 	__fc.structs = structs
 
-	return &FileConfigBuilder{__fc: __fc}
+	return &fileConfigBuilderImpl{__fc: __fc}
 }
 
-// Purge purges FileConfig instance from FileConfigBuilder.
+// Build purges FileConfig instance from fileConfigBuilderImpl.
 //
-// If calls other method in FileConfigBuilder after Purge called, it will be panic.
-func (__fcb *FileConfigBuilder) Build() *FileConfig {
+// If calls other method in fileConfigBuilderImpl after Purge called, it will be panic.
+func (__fcb *fileConfigBuilderImpl) Build() *FileConfig {
 	if __fcb == nil {
-		panic("FileConfigBuilder is nil")
+		panic("fileConfigBuilderImpl is nil")
 	} else if __fcb.__fc != nil {
 		__fc := __fcb.__fc
 		__fcb.__fc = nil
@@ -67,8 +71,12 @@ func (__fc *FileConfig) Structs() []StructConfig {
 	panic("FileConfig is nil")
 }
 
-// ImportConfigBuilder is an instance for generating an instance of ImportConfig.
-type ImportConfigBuilder struct {
+type ImportConfigBuilder interface {
+	Build() *ImportConfig
+}
+
+// importConfigBuilderImpl is an instance for generating an instance of ImportConfig.
+type importConfigBuilderImpl struct {
 	__ic *ImportConfig
 }
 
@@ -76,21 +84,21 @@ type ImportConfigBuilder struct {
 func NewImportConfigBuilder(
 	name string,
 	path string,
-) *ImportConfigBuilder {
+) ImportConfigBuilder {
 	__ic := &ImportConfig{}
 
 	__ic.name = name
 	__ic.path = path
 
-	return &ImportConfigBuilder{__ic: __ic}
+	return &importConfigBuilderImpl{__ic: __ic}
 }
 
-// Purge purges ImportConfig instance from ImportConfigBuilder.
+// Build purges ImportConfig instance from importConfigBuilderImpl.
 //
-// If calls other method in ImportConfigBuilder after Purge called, it will be panic.
-func (__icb *ImportConfigBuilder) Build() *ImportConfig {
+// If calls other method in importConfigBuilderImpl after Purge called, it will be panic.
+func (__icb *importConfigBuilderImpl) Build() *ImportConfig {
 	if __icb == nil {
-		panic("ImportConfigBuilder is nil")
+		panic("importConfigBuilderImpl is nil")
 	} else if __icb.__ic != nil {
 		__ic := __icb.__ic
 		__icb.__ic = nil
@@ -101,8 +109,14 @@ func (__icb *ImportConfigBuilder) Build() *ImportConfig {
 	panic("ImportConfig has been already purged")
 }
 
-// StructConfigBuilder is an instance for generating an instance of StructConfig.
-type StructConfigBuilder struct {
+type StructConfigBuilder interface {
+	SetDocText(docText string) StructConfigBuilder
+	SetDefineFilename(defineFilename string) StructConfigBuilder
+	Build() *StructConfig
+}
+
+// structConfigBuilderImpl is an instance for generating an instance of StructConfig.
+type structConfigBuilderImpl struct {
 	__sc *StructConfig
 }
 
@@ -113,7 +127,7 @@ func NewStructConfigBuilder(
 	mutexFieldName string,
 	enableMarshalJSON bool,
 	fields []FieldConfig,
-) *StructConfigBuilder {
+) StructConfigBuilder {
 	__sc := &StructConfig{}
 
 	__sc.name = name
@@ -122,12 +136,12 @@ func NewStructConfigBuilder(
 	__sc.enableMarshalJSON = enableMarshalJSON
 	__sc.fields = fields
 
-	return &StructConfigBuilder{__sc: __sc}
+	return &structConfigBuilderImpl{__sc: __sc}
 }
 
-func (__scb *StructConfigBuilder) SetDocText(docText string) *StructConfigBuilder {
+func (__scb *structConfigBuilderImpl) SetDocText(docText string) StructConfigBuilder {
 	if __scb == nil {
-		panic("StructConfigBuilder is nil")
+		panic("structConfigBuilderImpl is nil")
 	} else if __scb.__sc != nil {
 		__scb.__sc.docText = docText
 		return __scb
@@ -136,9 +150,9 @@ func (__scb *StructConfigBuilder) SetDocText(docText string) *StructConfigBuilde
 	panic("StructConfig has been already purged")
 }
 
-func (__scb *StructConfigBuilder) SetDefineFilename(defineFilename string) *StructConfigBuilder {
+func (__scb *structConfigBuilderImpl) SetDefineFilename(defineFilename string) StructConfigBuilder {
 	if __scb == nil {
-		panic("StructConfigBuilder is nil")
+		panic("structConfigBuilderImpl is nil")
 	} else if __scb.__sc != nil {
 		__scb.__sc.defineFilename = defineFilename
 		return __scb
@@ -147,12 +161,12 @@ func (__scb *StructConfigBuilder) SetDefineFilename(defineFilename string) *Stru
 	panic("StructConfig has been already purged")
 }
 
-// Purge purges StructConfig instance from StructConfigBuilder.
+// Build purges StructConfig instance from structConfigBuilderImpl.
 //
-// If calls other method in StructConfigBuilder after Purge called, it will be panic.
-func (__scb *StructConfigBuilder) Build() *StructConfig {
+// If calls other method in structConfigBuilderImpl after Purge called, it will be panic.
+func (__scb *structConfigBuilderImpl) Build() *StructConfig {
 	if __scb == nil {
-		panic("StructConfigBuilder is nil")
+		panic("structConfigBuilderImpl is nil")
 	} else if __scb.__sc != nil {
 		__sc := __scb.__sc
 		__scb.__sc = nil
@@ -231,21 +245,28 @@ func (__sc *StructConfig) SetDefineFilename(defineFilename string) {
 	}
 }
 
-// StructSupportsBuilder is an instance for generating an instance of StructSupports.
-type StructSupportsBuilder struct {
+type StructSupportsBuilder interface {
+	SetHasPreNewHook(hasPreNewHook bool) StructSupportsBuilder
+	SetHasPostNewHook(hasPostNewHook bool) StructSupportsBuilder
+	SetHasPostNewHookError(hasPostNewHookError bool) StructSupportsBuilder
+	Build() *StructSupports
+}
+
+// structSupportsBuilderImpl is an instance for generating an instance of StructSupports.
+type structSupportsBuilderImpl struct {
 	__ss *StructSupports
 }
 
 // NewStructSupportsBuilder creates an StructSupportsBuilder instance.
-func NewStructSupportsBuilder() *StructSupportsBuilder {
+func NewStructSupportsBuilder() StructSupportsBuilder {
 	__ss := &StructSupports{}
 
-	return &StructSupportsBuilder{__ss: __ss}
+	return &structSupportsBuilderImpl{__ss: __ss}
 }
 
-func (__ssb *StructSupportsBuilder) SetHasPreNewHook(hasPreNewHook bool) *StructSupportsBuilder {
+func (__ssb *structSupportsBuilderImpl) SetHasPreNewHook(hasPreNewHook bool) StructSupportsBuilder {
 	if __ssb == nil {
-		panic("StructSupportsBuilder is nil")
+		panic("structSupportsBuilderImpl is nil")
 	} else if __ssb.__ss != nil {
 		__ssb.__ss.hasPreNewHook = hasPreNewHook
 		return __ssb
@@ -254,9 +275,9 @@ func (__ssb *StructSupportsBuilder) SetHasPreNewHook(hasPreNewHook bool) *Struct
 	panic("StructSupports has been already purged")
 }
 
-func (__ssb *StructSupportsBuilder) SetHasPostNewHook(hasPostNewHook bool) *StructSupportsBuilder {
+func (__ssb *structSupportsBuilderImpl) SetHasPostNewHook(hasPostNewHook bool) StructSupportsBuilder {
 	if __ssb == nil {
-		panic("StructSupportsBuilder is nil")
+		panic("structSupportsBuilderImpl is nil")
 	} else if __ssb.__ss != nil {
 		__ssb.__ss.hasPostNewHook = hasPostNewHook
 		return __ssb
@@ -265,9 +286,9 @@ func (__ssb *StructSupportsBuilder) SetHasPostNewHook(hasPostNewHook bool) *Stru
 	panic("StructSupports has been already purged")
 }
 
-func (__ssb *StructSupportsBuilder) SetHasPostNewHookError(hasPostNewHookError bool) *StructSupportsBuilder {
+func (__ssb *structSupportsBuilderImpl) SetHasPostNewHookError(hasPostNewHookError bool) StructSupportsBuilder {
 	if __ssb == nil {
-		panic("StructSupportsBuilder is nil")
+		panic("structSupportsBuilderImpl is nil")
 	} else if __ssb.__ss != nil {
 		__ssb.__ss.hasPostNewHookError = hasPostNewHookError
 		return __ssb
@@ -276,12 +297,12 @@ func (__ssb *StructSupportsBuilder) SetHasPostNewHookError(hasPostNewHookError b
 	panic("StructSupports has been already purged")
 }
 
-// Purge purges StructSupports instance from StructSupportsBuilder.
+// Build purges StructSupports instance from structSupportsBuilderImpl.
 //
-// If calls other method in StructSupportsBuilder after Purge called, it will be panic.
-func (__ssb *StructSupportsBuilder) Build() *StructSupports {
+// If calls other method in structSupportsBuilderImpl after Purge called, it will be panic.
+func (__ssb *structSupportsBuilderImpl) Build() *StructSupports {
 	if __ssb == nil {
-		panic("StructSupportsBuilder is nil")
+		panic("structSupportsBuilderImpl is nil")
 	} else if __ssb.__ss != nil {
 		__ss := __ssb.__ss
 		__ssb.__ss = nil
@@ -316,8 +337,12 @@ func (__ss *StructSupports) HasPostNewHookError() bool {
 	panic("StructSupports is nil")
 }
 
-// FieldConfigBuilder is an instance for generating an instance of FieldConfig.
-type FieldConfigBuilder struct {
+type FieldConfigBuilder interface {
+	Build() *FieldConfig
+}
+
+// fieldConfigBuilderImpl is an instance for generating an instance of FieldConfig.
+type fieldConfigBuilderImpl struct {
 	__fc *FieldConfig
 }
 
@@ -327,7 +352,7 @@ func NewFieldConfigBuilder(
 	typeName string,
 	jsonTag string,
 	features *FieldConfigFeatures,
-) *FieldConfigBuilder {
+) FieldConfigBuilder {
 	__fc := &FieldConfig{}
 
 	__fc.name = name
@@ -335,15 +360,15 @@ func NewFieldConfigBuilder(
 	__fc.jsonTag = jsonTag
 	__fc.features = features
 
-	return &FieldConfigBuilder{__fc: __fc}
+	return &fieldConfigBuilderImpl{__fc: __fc}
 }
 
-// Purge purges FieldConfig instance from FieldConfigBuilder.
+// Build purges FieldConfig instance from fieldConfigBuilderImpl.
 //
-// If calls other method in FieldConfigBuilder after Purge called, it will be panic.
-func (__fcb *FieldConfigBuilder) Build() *FieldConfig {
+// If calls other method in fieldConfigBuilderImpl after Purge called, it will be panic.
+func (__fcb *fieldConfigBuilderImpl) Build() *FieldConfig {
 	if __fcb == nil {
-		panic("FieldConfigBuilder is nil")
+		panic("fieldConfigBuilderImpl is nil")
 	} else if __fcb.__fc != nil {
 		__fc := __fcb.__fc
 		__fcb.__fc = nil
@@ -413,8 +438,12 @@ func (__fc *FieldConfig) SetFeatures(features *FieldConfigFeatures) {
 	}
 }
 
-// FieldConfigFeaturesBuilder is an instance for generating an instance of FieldConfigFeatures.
-type FieldConfigFeaturesBuilder struct {
+type FieldConfigFeaturesBuilder interface {
+	Build() *FieldConfigFeatures
+}
+
+// fieldConfigFeaturesBuilderImpl is an instance for generating an instance of FieldConfigFeatures.
+type fieldConfigFeaturesBuilderImpl struct {
 	__fcf *FieldConfigFeatures
 }
 
@@ -426,7 +455,7 @@ func NewFieldConfigFeaturesBuilder(
 	hasPtrGetter bool,
 	hasGetter bool,
 	hasSetter bool,
-) *FieldConfigFeaturesBuilder {
+) FieldConfigFeaturesBuilder {
 	__fcf := &FieldConfigFeatures{}
 
 	__fcf.usesMutex = usesMutex
@@ -436,15 +465,15 @@ func NewFieldConfigFeaturesBuilder(
 	__fcf.hasGetter = hasGetter
 	__fcf.hasSetter = hasSetter
 
-	return &FieldConfigFeaturesBuilder{__fcf: __fcf}
+	return &fieldConfigFeaturesBuilderImpl{__fcf: __fcf}
 }
 
-// Purge purges FieldConfigFeatures instance from FieldConfigFeaturesBuilder.
+// Build purges FieldConfigFeatures instance from fieldConfigFeaturesBuilderImpl.
 //
-// If calls other method in FieldConfigFeaturesBuilder after Purge called, it will be panic.
-func (__fcfb *FieldConfigFeaturesBuilder) Build() *FieldConfigFeatures {
+// If calls other method in fieldConfigFeaturesBuilderImpl after Purge called, it will be panic.
+func (__fcfb *fieldConfigFeaturesBuilderImpl) Build() *FieldConfigFeatures {
 	if __fcfb == nil {
-		panic("FieldConfigFeaturesBuilder is nil")
+		panic("fieldConfigFeaturesBuilderImpl is nil")
 	} else if __fcfb.__fcf != nil {
 		__fcf := __fcfb.__fcf
 		__fcfb.__fcf = nil
