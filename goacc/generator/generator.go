@@ -3,6 +3,7 @@ package generator
 
 import (
 	"bytes"
+	"fmt"
 	"go/format"
 	"os"
 	"path/filepath"
@@ -26,7 +27,7 @@ func (g *Generator) goaccPreNewHook() {
 	g.cache = make(map[string]*entity.FileConfig)
 }
 
-func (g *Generator) Generate(srcFilename string, generateConfig *entity.GenerateConfig) (destFilename string, b []byte) {
+func (g *Generator) Generate(srcFilename string, generateConfig *entity.GenerateConfig) (destFilename string, b []byte, err error) {
 
 	if !filepath.IsAbs(srcFilename) {
 		srcFilename = filepath.Join(generateConfig.WorkingDir(), srcFilename)
@@ -54,36 +55,32 @@ func (g *Generator) Generate(srcFilename string, generateConfig *entity.Generate
 	destFilename = RenameDestFilename(srcFilename)
 
 	if buffer.Len() == emptyLength {
-		return destFilename, nil
+		return destFilename, nil, nil
 	}
 
-	b, err := format.Source(buffer.Bytes())
+	b, err = format.Source(buffer.Bytes())
 	if err != nil {
-		// debug code
-		if writeErr := WriteFile(destFilename, buffer.Bytes()); writeErr != nil {
-			panic(err.Error() + ", and " + writeErr.Error())
-		}
-		panic(err.Error())
+		return destFilename, nil, fmt.Errorf("%w: %w", entity.ErrFailedGoFmtCommand, err)
 	}
 
 	b, err = imports.Process(destFilename, b, nil)
 	if err != nil {
-		panic(err.Error())
+		return destFilename, nil, fmt.Errorf("%w: %w", entity.ErrFailedGoImportsCommand, err)
 	}
 
-	return destFilename, b
+	return destFilename, b, nil
 }
 
-func (g *Generator) loadFile(srcFilename string, generateConfig *entity.GenerateConfig) {
+func (g *Generator) loadFile(srcFilename string, generateConfig *entity.GenerateConfig) error {
 	dirname := filepath.Dir(srcFilename)
 	pkg, err := parser.LoadPackage(parser.NewLoadPackageInputBuilder(
 		dirname,
 	).Build())
 	if err != nil {
-		panic(err.Error())
+		return fmt.Errorf("cannot load file '%s': %w", srcFilename, err)
 	}
 
-	fileConfigs := parser.ParsePackage(
+	fileConfigs, err := parser.ParsePackage(
 		parser.NewParsePackageInputBuilder(
 			pkg,
 			generateConfig.DefaultTag(),
@@ -97,6 +94,8 @@ func (g *Generator) loadFile(srcFilename string, generateConfig *entity.Generate
 	if _, exist := g.cache[srcFilename]; !exist {
 		panic("cannot cache: " + srcFilename)
 	}
+
+	return nil
 }
 
 func WriteFile(destFilename string, buffer []byte) error {

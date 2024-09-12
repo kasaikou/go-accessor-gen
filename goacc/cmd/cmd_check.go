@@ -44,11 +44,15 @@ func Check(config *entity.CheckConfig) {
 					current = buf.Bytes()
 				}
 
-				_, expect := g.Generate(path, entity.NewGenerateConfigBuilder(
+				_, expect, err := g.Generate(path, entity.NewGenerateConfigBuilder(
 					config.WorkingDir(),
 					config.IncludePattern(),
 					meta.DefaultTag(),
 				).Build())
+				if err != nil {
+					log.Printf("Cannot generate file '%s': %s", goaccPath, err.Error())
+					exitCode = 1
+				}
 
 				switch {
 				case expect == nil && current == nil:
@@ -70,7 +74,5 @@ func Check(config *entity.CheckConfig) {
 		return nil
 	})
 
-	if exitCode != 0 {
-		os.Exit(exitCode)
-	}
+	os.Exit(exitCode)
 }
