@@ -17,7 +17,11 @@ func Generate(config *entity.GenerateConfig) {
 		if !d.IsDir() {
 			if !strings.HasSuffix(path, "_goacc.go") && !strings.HasSuffix(path, "_goacc_test.go") {
 				log.Printf("Generate from %s", path)
-				generator.WriteFile(g.Generate(path, config))
+				destFilename, buffer, err := g.Generate(path, config)
+				if err != nil {
+					log.Printf("Cannot generate file '%s': %s", destFilename, err.Error())
+				}
+				generator.WriteFile(destFilename, buffer)
 			}
 		}
 		return nil

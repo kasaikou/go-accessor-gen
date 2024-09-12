@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/types"
@@ -21,7 +22,7 @@ func LoadPackage(input *LoadPackageInput) (*packages.Package, error) {
 	const mode = packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesInfo
 	dir, err := filepath.Abs(input.dirname)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", entity.ErrCannotParseGoFile, err)
 	}
 
 	pkgs, err := packages.Load(&packages.Config{
@@ -32,17 +33,18 @@ func LoadPackage(input *LoadPackageInput) (*packages.Package, error) {
 	if err != nil {
 		return nil, err
 	} else if len(pkgs) != 1 {
-		return nil, fmt.Errorf("%d packages found", len(pkgs))
+		return nil, fmt.Errorf("%w: %d packages found", entity.ErrCannotParseGoFile, len(pkgs))
 	} else if len(pkgs[0].GoFiles) != len(pkgs[0].Syntax) {
-		return nil, fmt.Errorf("%d compiled go files found, but %d syntax found", len(pkgs[0].CompiledGoFiles), len(pkgs[0].Syntax))
+		return nil, fmt.Errorf("%w: %d compiled go files found, but %d syntax found", entity.ErrCannotParseGoFile, len(pkgs[0].CompiledGoFiles), len(pkgs[0].Syntax))
 	}
 
 	return pkgs[0], nil
 }
 
-func ParsePackage(input *ParsePackageInput) []entity.FileConfig {
+func ParsePackage(input *ParsePackageInput) ([]entity.FileConfig, error) {
 
 	files := []entity.FileConfig{}
+	errs := make([]error, 0, len(input.pkg.GoFiles))
 	for i := range input.pkg.GoFiles {
 		goFile := input.pkg.GoFiles[i]
 		syntax := input.pkg.Syntax[i]
@@ -65,7 +67,8 @@ func ParsePackage(input *ParsePackageInput) []entity.FileConfig {
 				if !isValid {
 					break
 				}
-				structConfig := parseStruct(namedType, structType, input.defaultTag)
+				structConfig, err := parseStruct(namedType, structType, input.defaultTag)
+				errs = append(errs, err)
 
 				// Set struct metadata into structConfig.
 				structConfig.SetDefineFilename(goFile)
@@ -95,7 +98,7 @@ func ParsePackage(input *ParsePackageInput) []entity.FileConfig {
 		files = append(files, *entity.NewFileConfigBuilder(goFile, input.pkg.Name, imports, structs).Build())
 	}
 
-	return files
+	return files, errors.Join(errs...)
 }
 
 func parseNamedStructType(object types.Object) (namedType *types.Named, structType *types.Struct, isValid bool) {
@@ -114,7 +117,7 @@ func parseNamedStructType(object types.Object) (namedType *types.Named, structTy
 
 var errType = types.Universe.Lookup("error").Type()
 
-func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag string) entity.StructConfig {
+func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag string) (entity.StructConfig, error) {
 
 	structSupportsBuilder := entity.NewStructSupportsBuilder()
 	enableMarshalJSON := false
@@ -136,6 +139,8 @@ func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag st
 				if signatureResult := signature.Results().At(0); types.AssignableTo(signatureResult.Type(), errType) {
 					structSupportsBuilder.SetHasPostNewHookError(true)
 				}
+			} else {
+				return entity.StructConfig{}, fmt.Errorf("%w: %s has invalid goaccPostNewHook method, allows goaccPostNewHook() or goaccPostNewHook() error", entity.ErrInvalidGoaccFormat, structType)
 			}
 		}
 	}
@@ -187,7 +192,7 @@ func parseStruct(namedType *types.Named, structType *types.Struct, defaultTag st
 		"",
 		enableMarshalJSON,
 		fields,
-	).Build()
+	).Build(), nil
 }
 
 func parseStructFieldTag(splitedTags []string) entity.FieldConfigFeatures {
