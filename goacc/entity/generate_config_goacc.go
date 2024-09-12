@@ -4,8 +4,12 @@ package entity
 
 import "encoding/json"
 
-// GenerateConfigBuilder is an instance for generating an instance of GenerateConfig.
-type GenerateConfigBuilder struct {
+type GenerateConfigBuilder interface {
+	Build() *GenerateConfig
+}
+
+// generateConfigBuilderImpl is an instance for generating an instance of GenerateConfig.
+type generateConfigBuilderImpl struct {
 	__gc *GenerateConfig
 }
 
@@ -14,7 +18,7 @@ func NewGenerateConfigBuilder(
 	workingDir string,
 	includePattern string,
 	defaultTag string,
-) *GenerateConfigBuilder {
+) GenerateConfigBuilder {
 	__gc := &GenerateConfig{}
 
 	__gc.goaccPreNewHook() // This function calls your defined hook.
@@ -23,15 +27,15 @@ func NewGenerateConfigBuilder(
 	__gc.includePattern = includePattern
 	__gc.defaultTag = defaultTag
 
-	return &GenerateConfigBuilder{__gc: __gc}
+	return &generateConfigBuilderImpl{__gc: __gc}
 }
 
-// Purge purges GenerateConfig instance from GenerateConfigBuilder.
+// Build purges GenerateConfig instance from generateConfigBuilderImpl.
 //
-// If calls other method in GenerateConfigBuilder after Purge called, it will be panic.
-func (__gcb *GenerateConfigBuilder) Build() *GenerateConfig {
+// If calls other method in generateConfigBuilderImpl after Purge called, it will be panic.
+func (__gcb *generateConfigBuilderImpl) Build() *GenerateConfig {
 	if __gcb == nil {
-		panic("GenerateConfigBuilder is nil")
+		panic("generateConfigBuilderImpl is nil")
 	} else if __gcb.__gc != nil {
 		__gc := __gcb.__gc
 		__gcb.__gc = nil

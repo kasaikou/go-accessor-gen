@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -26,13 +27,27 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 
 	structType := structConfig.Name()
 	builderType := renameToPascalCase(structType) + "Builder"
+	builderImplType := renameToCamelCase(builderType) + "Impl"
 	identFieldStruct := "__" + renameToShorter(structType)
+	recieverName := identFieldStruct + "b"
 
-	// Creates PiyoPiyoBuilder struct definition.
+	fprintfln(dest, "type %s interface {", builderType)
+	{
+		for _, field := range optionalFields {
+			_, _, definition := generateNewSetDefinition(builderType, &field)
+			fprintfln(dest, definition)
+		}
+		_, definition := generateNewBuildDefinition(&structConfig)
+		fprintfln(dest, definition)
+	}
+	fprintfln(dest, "}")
+	fprintfln(dest, "")
+
+	// Creates piyoPiyoBuilderImpl struct definition.
 	fprintfln(dest, convertToComment(`
 		%s is an instance for generating an instance of %s.
-	`), builderType, structType)
-	fprintfln(dest, "type %s struct {\n", builderType)
+	`), builderImplType, structType)
+	fprintfln(dest, "type %s struct {\n", builderImplType)
 	{
 		fprintfln(dest, "%s *%s", identFieldStruct, structType)
 	}
@@ -47,7 +62,7 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 	for _, field := range requiredFields {
 		fprintfln(dest, "%s %s,", field.Name(), field.TypeName())
 	}
-	fprintfln(dest, ") *%s {", builderType)
+	fprintfln(dest, ") %s {", builderType)
 	{
 		fprintfln(dest, "%s := &%s{}", identFieldStruct, structType)
 		fprintfln(dest, "")
@@ -65,30 +80,28 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 			fprintfln(dest, "")
 		}
 
-		fprintfln(dest, "return &%s{%s: %s}", builderType, identFieldStruct, identFieldStruct)
+		fprintfln(dest, "return &%s{%s: %s}", builderImplType, identFieldStruct, identFieldStruct)
 	}
 	fprintfln(dest, "}")
 	fprintfln(dest, "")
 
-	recieverName := identFieldStruct + "b"
-
-	// Creates (PiyoPiyoBuilder).WithHogeHoge() functions.
+	// Creates (PiyoPiyoBuilder).SetHogeHoge() functions.
 	for _, field := range optionalFields {
-		withName := "Set" + renameToPascalCase(field.Name())
+		methodName, paramName, methodDefinition := generateNewSetDefinition(builderType, &field)
 		if comment := field.DocText(); comment != "" {
-			fprintfln(dest, strings.ReplaceAll(convertToComment(comment), field.Name(), withName))
+			fprintfln(dest, strings.ReplaceAll(convertToComment(comment), field.Name(), methodName))
 		}
-		fprintfln(dest, "func (%s *%s) %s(%s %s) *%s {", recieverName, builderType, withName, field.Name(), field.TypeName(), builderType)
+		fprintfln(dest, "func (%s *%s) %s {", recieverName, builderImplType, methodDefinition)
 		{
 			fprintfln(dest, "if %s == nil {", recieverName)
 			{
-				fprintfln(dest, "panic(\"%s is nil\")", builderType)
+				fprintfln(dest, "panic(\"%s is nil\")", builderImplType)
 			}
 			fprintfln(dest, "} else if %s.%s != nil {", recieverName, identFieldStruct)
 			{
 				// TODO: add mutex
 
-				fprintfln(dest, "%s.%s.%s = %s", recieverName, identFieldStruct, field.Name(), field.Name())
+				fprintfln(dest, "%s.%s.%s = %s", recieverName, identFieldStruct, field.Name(), paramName)
 				fprintfln(dest, "return %s", recieverName)
 			}
 			fprintfln(dest, "}")
@@ -100,23 +113,20 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 		fprintfln(dest, "")
 	}
 
-	// Creates (PiyoPiyoBuilder).Purge() function.
+	// Creates (PiyoPiyoBuilder).Build() function.
+	buildMethodName, buildMethodDefinition := generateNewBuildDefinition(&structConfig)
 	fprintfln(dest, convertToComment(`
-		Build purges %s instance from %s.
+		%s purges %s instance from %s.
 
 		If calls other method in %s after Purge called, it will be panic.
-	`), structType, builderType, builderType)
+	`), buildMethodName, structType, builderImplType, builderImplType)
 
-	if structConfig.StructSupportsPtr().HasPostNewHookError() {
-		fprintfln(dest, "func (%s *%s) Build() (*%s, error) {", recieverName, builderType, structType)
-	} else {
-		fprintfln(dest, "func (%s *%s) Build() *%s {", recieverName, builderType, structType)
-	}
+	fprintfln(dest, "func (%s *%s) %s {", recieverName, builderImplType, buildMethodDefinition)
 
 	{
 		fprintfln(dest, "if %s == nil {", recieverName)
 		{
-			fprintfln(dest, "panic(\"%s is nil\")", builderType)
+			fprintfln(dest, "panic(\"%s is nil\")", builderImplType)
 		}
 		fprintfln(dest, "} else if %s.%s != nil {", recieverName, identFieldStruct)
 		{
@@ -145,4 +155,18 @@ func generateNew(dest io.Writer, structConfig entity.StructConfig) {
 	fprintfln(dest, "}")
 	fprintfln(dest, "")
 
+}
+
+func generateNewSetDefinition(builderType string, config *entity.FieldConfig) (methodName, paramName, definition string) {
+	methodName = "Set" + renameToPascalCase(config.Name())
+	paramName = config.Name()
+	return methodName, paramName, fmt.Sprintf("%s(%s %s) %s", methodName, paramName, config.TypeName(), builderType)
+}
+
+func generateNewBuildDefinition(config *entity.StructConfig) (methodName, definition string) {
+	if config.StructSupportsPtr().HasPostNewHookError() {
+		return "Build", fmt.Sprintf("Build() (*%s, error)", config.Name())
+	} else {
+		return "Build", fmt.Sprintf("Build() *%s", config.Name())
+	}
 }

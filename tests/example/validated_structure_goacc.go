@@ -2,28 +2,32 @@
 // defaultTag=-
 package tests
 
-// ValidatedBuilder is an instance for generating an instance of Validated.
-type ValidatedBuilder struct {
+type ValidatedBuilder interface {
+	Build() (*Validated, error)
+}
+
+// validatedBuilderImpl is an instance for generating an instance of Validated.
+type validatedBuilderImpl struct {
 	__v *Validated
 }
 
 // NewValidatedBuilder creates an ValidatedBuilder instance.
 func NewValidatedBuilder(
 	Type string,
-) *ValidatedBuilder {
+) ValidatedBuilder {
 	__v := &Validated{}
 
 	__v.Type = Type
 
-	return &ValidatedBuilder{__v: __v}
+	return &validatedBuilderImpl{__v: __v}
 }
 
-// Purge purges Validated instance from ValidatedBuilder.
+// Build purges Validated instance from validatedBuilderImpl.
 //
-// If calls other method in ValidatedBuilder after Purge called, it will be panic.
-func (__vb *ValidatedBuilder) Build() (*Validated, error) {
+// If calls other method in validatedBuilderImpl after Purge called, it will be panic.
+func (__vb *validatedBuilderImpl) Build() (*Validated, error) {
 	if __vb == nil {
-		panic("ValidatedBuilder is nil")
+		panic("validatedBuilderImpl is nil")
 	} else if __vb.__v != nil {
 		__v := __vb.__v
 		__vb.__v = nil

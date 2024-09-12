@@ -4,8 +4,14 @@ package tests
 
 import "github.com/google/uuid"
 
-// AnimalBuilder is an instance for generating an instance of Animal.
-type AnimalBuilder struct {
+type AnimalBuilder interface {
+	SetName(name string) AnimalBuilder
+	SetKind(kind string) AnimalBuilder
+	Build() *Animal
+}
+
+// animalBuilderImpl is an instance for generating an instance of Animal.
+type animalBuilderImpl struct {
 	__a *Animal
 }
 
@@ -14,7 +20,7 @@ func NewAnimalBuilder(
 	id uuid.UUID,
 	name string,
 	kind string,
-) *AnimalBuilder {
+) AnimalBuilder {
 	__a := &Animal{}
 
 	__a.goaccPreNewHook() // This function calls your defined hook.
@@ -23,13 +29,13 @@ func NewAnimalBuilder(
 	__a.name = name
 	__a.kind = kind
 
-	return &AnimalBuilder{__a: __a}
+	return &animalBuilderImpl{__a: __a}
 }
 
 // SetName of animal
-func (__ab *AnimalBuilder) SetName(name string) *AnimalBuilder {
+func (__ab *animalBuilderImpl) SetName(name string) AnimalBuilder {
 	if __ab == nil {
-		panic("AnimalBuilder is nil")
+		panic("animalBuilderImpl is nil")
 	} else if __ab.__a != nil {
 		__ab.__a.name = name
 		return __ab
@@ -39,9 +45,9 @@ func (__ab *AnimalBuilder) SetName(name string) *AnimalBuilder {
 }
 
 // SetKind of animal
-func (__ab *AnimalBuilder) SetKind(kind string) *AnimalBuilder {
+func (__ab *animalBuilderImpl) SetKind(kind string) AnimalBuilder {
 	if __ab == nil {
-		panic("AnimalBuilder is nil")
+		panic("animalBuilderImpl is nil")
 	} else if __ab.__a != nil {
 		__ab.__a.kind = kind
 		return __ab
@@ -50,12 +56,12 @@ func (__ab *AnimalBuilder) SetKind(kind string) *AnimalBuilder {
 	panic("Animal has been already purged")
 }
 
-// Purge purges Animal instance from AnimalBuilder.
+// Build purges Animal instance from animalBuilderImpl.
 //
-// If calls other method in AnimalBuilder after Purge called, it will be panic.
-func (__ab *AnimalBuilder) Build() *Animal {
+// If calls other method in animalBuilderImpl after Purge called, it will be panic.
+func (__ab *animalBuilderImpl) Build() *Animal {
 	if __ab == nil {
-		panic("AnimalBuilder is nil")
+		panic("animalBuilderImpl is nil")
 	} else if __ab.__a != nil {
 		__a := __ab.__a
 		__ab.__a = nil

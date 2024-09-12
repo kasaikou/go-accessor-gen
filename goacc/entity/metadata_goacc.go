@@ -4,21 +4,26 @@ package entity
 
 import "encoding/json"
 
-// MetadataBuilder is an instance for generating an instance of Metadata.
-type MetadataBuilder struct {
+type MetadataBuilder interface {
+	SetDefaultTag(defaultTag string) MetadataBuilder
+	Build() *Metadata
+}
+
+// metadataBuilderImpl is an instance for generating an instance of Metadata.
+type metadataBuilderImpl struct {
 	__m *Metadata
 }
 
 // NewMetadataBuilder creates an MetadataBuilder instance.
-func NewMetadataBuilder() *MetadataBuilder {
+func NewMetadataBuilder() MetadataBuilder {
 	__m := &Metadata{}
 
-	return &MetadataBuilder{__m: __m}
+	return &metadataBuilderImpl{__m: __m}
 }
 
-func (__mb *MetadataBuilder) SetDefaultTag(defaultTag string) *MetadataBuilder {
+func (__mb *metadataBuilderImpl) SetDefaultTag(defaultTag string) MetadataBuilder {
 	if __mb == nil {
-		panic("MetadataBuilder is nil")
+		panic("metadataBuilderImpl is nil")
 	} else if __mb.__m != nil {
 		__mb.__m.defaultTag = defaultTag
 		return __mb
@@ -27,12 +32,12 @@ func (__mb *MetadataBuilder) SetDefaultTag(defaultTag string) *MetadataBuilder {
 	panic("Metadata has been already purged")
 }
 
-// Purge purges Metadata instance from MetadataBuilder.
+// Build purges Metadata instance from metadataBuilderImpl.
 //
-// If calls other method in MetadataBuilder after Purge called, it will be panic.
-func (__mb *MetadataBuilder) Build() *Metadata {
+// If calls other method in metadataBuilderImpl after Purge called, it will be panic.
+func (__mb *metadataBuilderImpl) Build() *Metadata {
 	if __mb == nil {
-		panic("MetadataBuilder is nil")
+		panic("metadataBuilderImpl is nil")
 	} else if __mb.__m != nil {
 		__m := __mb.__m
 		__mb.__m = nil
